@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <security:http pattern="/resources/**" security="none"/>
+    
+    <security:http  auto-config="false"
+                    use-expressions="true"                    
+                    entry-point-ref="loginEntryPoint">
+        <security:custom-filter  position="PRE_AUTH_FILTER" ref="wwpassContainerAuthenticationFilter" />
+        <security:form-login    login-page="/login/form"
+                                username-parameter="username"
+                                password-parameter="password"
+                                default-target-url="/"
+                                authentication-failure-url="/login/form?error" login-processing-url="/login"/>
+        <security:intercept-url pattern="/login/**" access="permitAll" />
+        <security:intercept-url pattern="/signup/**" access="permitAll" />
+        <security:intercept-url pattern="/wwpass" access="permitAll" />
+        <security:intercept-url pattern="/" access="hasRole('ROLE_USER')"/>
+        <security:logout logout-url="/logout"
+                         logout-success-url="/login/form?logout" />
+    </security:http>
+    
+    <bean   id="wwpassContainerAuthenticationFilter"
+            class="com.wwpass.fidelity.demo.web.authentication.WwpassContainerAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="credentials" value="ROLE_USER" />       
+    </bean>
+    
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="preauthAuthProvider" />
+        <security:authentication-provider user-service-ref="defaultDemoService" /> 
+    </security:authentication-manager>
+
+<!--    <bean id="authenticationManager"
+          class="org.springframework.security.authentication.ProviderManager">
+        <constructor-arg>
+            <list>
+                <ref bean="preauthAuthProvider"/>
+                <bean class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+                    <property name="userDetailsService" ref="defaultDemoService"/>
+                </bean>
+            </list>
+        </constructor-arg>
+    </bean>-->
+
+    
+    <bean xmlns="http://www.springframework.org/schema/beans"
+               id="loginEntryPoint"
+               class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg value="/login/form" />
+    </bean>
+    
+    <bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <property name="preAuthenticatedUserDetailsService">
+            <bean id="userDetailsServiceWrapper"  class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+                <property name="userDetailsService" ref="wwpassUserDetailsService"/>
+            </bean>
+        </property>
+    </bean>
+    
+    <bean id="wwpassUserDetailsService" class="com.wwpass.fidelity.demo.service.WwpassUserDetailsService">
+        <property name="containerStorage" ref="containerStorage" />
+    </bean>
+    
+    <bean id="containerStorage" class="com.wwpass.fidelity.demo.web.authentication.WwpassContainerStorage">
+        <property name="wwpassConnection" ref="wwpassConnection" />
+    </bean>
+
+    <!-- change this-->
+    <bean name="wwpassConnection" class="com.wwpass.connection.WWPassConnection">
+        <constructor-arg name="certFile" value="C:/springsource/jks/fidelity.test.crt"/>
+        <constructor-arg name="keyFile" value="C:/springsource/jks/fidelity.test.key"/>
+    </bean>
+    
+</beans>
