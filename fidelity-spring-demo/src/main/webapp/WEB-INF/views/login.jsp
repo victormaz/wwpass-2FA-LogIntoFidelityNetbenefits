@@ -59,6 +59,10 @@
 <script src="//cdn.wwpass.com/packages/latest/wwpass.js"></script>
 <script type="text/javascript" charset="utf-8">
 
+
+/* ID provider test 10/06/2014*/
+ 
+ 
     function OnAuth() {
         wwpass_auth('fidelity%2Dtest.wwpass.net:p', function (status, response) {
 /*            if (status != 603) {
