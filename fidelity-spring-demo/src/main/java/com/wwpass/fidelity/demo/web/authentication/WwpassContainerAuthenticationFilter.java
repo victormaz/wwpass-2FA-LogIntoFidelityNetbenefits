@@ -16,7 +16,8 @@ public class WwpassContainerAuthenticationFilter extends AbstractPreAuthenticate
         String ticket = request.getParameter("ticket");
         /*if (ticket.equals("")) {
             return null;
-        }*/request.setAttribute("uid", "2121321");request.setAttribute("password", "2121321pw");request.setAttribute("username", "2121321un");
+        }*/
+        
         return ticket;
     }
 

@@ -12,7 +12,8 @@
     <security:http  auto-config="false"
                     use-expressions="true"                    
                     entry-point-ref="loginEntryPoint">
-        <security:custom-filter  position="PRE_AUTH_FILTER" ref="wwpassContainerAuthenticationFilter" />
+                    
+        <!-- security:custom-filter  position="PRE_AUTH_FILTER" ref="wwpassContainerAuthenticationFilter" / -->
         <security:form-login    login-page="/login/form"
                                 username-parameter="username"
                                 password-parameter="password"
@@ -26,7 +27,7 @@
                          logout-success-url="/login/form?logout" />
     </security:http>
     
-    <bean   id="wwpassContainerAuthenticationFilter"
+    <!--  bean   id="wwpassContainerAuthenticationFilter"
             class="com.wwpass.fidelity.demo.web.authentication.WwpassContainerAuthenticationFilter">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="credentials" value="ROLE_USER" />       
@@ -35,7 +36,7 @@
     <security:authentication-manager alias="authenticationManager">
         <security:authentication-provider ref="preauthAuthProvider" />
         <security:authentication-provider user-service-ref="defaultDemoService" /> 
-    </security:authentication-manager>
+    </security:authentication-manager -->
 
 <!--    <bean id="authenticationManager"
           class="org.springframework.security.authentication.ProviderManager">
@@ -49,7 +50,7 @@
         </constructor-arg>
     </bean>-->
 
-    
+    <!--  
     <bean xmlns="http://www.springframework.org/schema/beans"
                id="loginEntryPoint"
                class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
@@ -63,6 +64,8 @@
             </bean>
         </property>
     </bean>
+    
+     -->
     
     <bean id="wwpassUserDetailsService" class="com.wwpass.fidelity.demo.service.WwpassUserDetailsService">
         <property name="containerStorage" ref="containerStorage" />

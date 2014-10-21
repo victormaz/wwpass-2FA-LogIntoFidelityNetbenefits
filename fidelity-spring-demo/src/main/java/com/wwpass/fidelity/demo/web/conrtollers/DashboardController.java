@@ -7,9 +7,13 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.google.gson.JsonSyntaxException;
 import com.wwpass.fidelity.demo.domain.DemoUser;
 import com.wwpass.fidelity.demo.service.DemoService;
 import com.wwpass.fidelity.demo.web.authentication.WwpassContainerStorage;
@@ -28,9 +33,9 @@ public class DashboardController {
 
     private final WwpassContainerStorage storage;
     private final DemoService demoService;
-    
     private final static String MODEL_PW_REF = "pw";
     private final static String MODEL_UID_REF = "uid";
+    
     
     @Autowired
     public DashboardController(WwpassContainerStorage storage, DemoService demoService) {
@@ -45,12 +50,43 @@ public class DashboardController {
     }
 
     @RequestMapping(value = "/wwpass", method = RequestMethod.POST)
-    public String wwpassLogin(@ModelAttribute DashboardForm dashboardForm) {
+    public String wwpassLogin(@ModelAttribute DashboardForm dashboardForm, Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof AnonymousAuthenticationToken) {
             return "redirect:/login/form?nouser";
         }
-        return "redirect:/"; 
+        // logged in
+        
+        WwpassContainerStorage.UsernamePasswordPair pair = null;
+        try {
+            pair = storage.readUsernamePasswordFromWwpass(dashboardForm.getTicket());
+        } catch (IOException e) {
+            throw new AuthenticationServiceException("Exception in WWPassConnection library: \n", e);
+        } catch (JsonSyntaxException e) {
+            throw new UsernameNotFoundException("There is no such user.");
+        }
+        
+        UserDetails user = new User(
+        		pair.username,
+        		pair.password, 
+                true, 
+                true, 
+                true, 
+                true, 
+                AuthorityUtils.createAuthorityList("ROLE_USER")
+        );
+
+       //if(auth != null && auth.isAuthenticated() && auth.getPrincipal() != null && !(auth instanceof AnonymousAuthenticationToken)) {
+    		
+    		if(user != null && !StringUtils.isEmpty(user.getPassword()) && !StringUtils.isEmpty(user.getUsername()) ){
+            	
+    			model.addAttribute(MODEL_PW_REF, user.getPassword());
+    	        model.addAttribute(MODEL_UID_REF, user.getUsername());
+    			return "loginredirect";
+            	
+            }
+    		return "/"; //"loginredirect";
+    	//}
     }
 
 
@@ -58,24 +94,24 @@ public class DashboardController {
     public String welcome(@ModelAttribute DashboardForm dashboardForm,
             Model model) {
     	
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     	
-    	Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        DemoUser demoUser = null;
-        if (principal instanceof User) {
-            demoUser = demoService.getUserByUsername( ((User)principal).getUsername());
-        } else {
-            demoUser = (DemoUser) principal;
-        }
-        
-        if(demoUser != null && !StringUtils.isEmpty(demoUser.getPassword()) && !StringUtils.isEmpty(demoUser.getUsername()) ){
-
-        	model.addAttribute(MODEL_PW_REF, demoUser.getPassword());
-	        model.addAttribute(MODEL_UID_REF, demoUser.getUsername());
-	        
-	        return "loginredirect";
-        }
-
-        
+    	if(auth != null && auth.isAuthenticated() && auth.getPrincipal() != null && !(auth instanceof AnonymousAuthenticationToken)) {
+    		
+    		Object principal = auth.getPrincipal();
+            DemoUser demoUser = null;
+            
+            if (principal instanceof User) {
+                demoUser = demoService.getUserByUsername( ((User)principal).getUsername());
+            } else {
+                demoUser = (DemoUser) principal;
+            }
+            
+            if(demoUser != null && !StringUtils.isEmpty(demoUser.getPassword()) && !StringUtils.isEmpty(demoUser.getUsername()) ){
+            	
+            }
+    		return "dashboard"; //"loginredirect";
+    	}
         return "dashboard";
     }
     
