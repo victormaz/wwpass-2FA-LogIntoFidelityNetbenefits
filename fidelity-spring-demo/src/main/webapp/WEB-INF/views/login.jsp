@@ -67,8 +67,10 @@
                 post_to_url("/wwpass", {ticket: response});
             }*/
             if (status == WWPass_OK) { //If ticket request handled successfully
+            	//alert("status OK = '" + status + "'");
                 post_to_url("/fidelity-spring-demo/wwpass", {ticket: response}); //Pass ticket to the auth.java and call it
             } else {
+            	//alert("status error = '" + status + "'");
                 document.location = "?nosoftware"; //If ticket request not handled, return error
             }
         });
@@ -96,6 +98,25 @@
         document.body.appendChild(form);
         form.submit();
     }
+    
+    window.alert = function(message, fallback){
+        if(fallback)
+        {
+            old_alert(message);
+            return;
+        }
+        $(document.createElement('div'))
+            .attr({title: 'Alert', 'class': 'alert'})
+            .html(message)
+            .dialog({
+                buttons: {OK: function(){$(this).dialog('close');}},
+                close: function(){$(this).remove();},
+                draggable: true,
+                modal: true,
+                resizable: false,
+                width: 'auto'
+            });
+    };
 </script>
 </body>
 </html>

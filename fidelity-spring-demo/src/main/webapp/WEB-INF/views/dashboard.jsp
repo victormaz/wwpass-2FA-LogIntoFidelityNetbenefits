@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Dashboard</title>
+    <title>Dashboard example</title>
 
     <!-- Bootstrap core CSS -->
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
 </head>
 <body>
 <div class="container">
-    <h1>Welcome, <sec:authentication property="principal.username" /> - "${password}" - uid- "${uid}" - "${param.password}"</h1>
+    <h1>Welcome, <sec:authentication property="principal.username" />!</h1>
     <br/>
     <p><a href="/fidelity-spring-demo/logout">Logout</a></p>
     <br/>
@@ -27,43 +27,7 @@
         <div class="alert alert-success" id="message"><c:out value="${message}"/></div>
     </c:if>
     <br/>
-    
-    <p>Login to Fidelity NetBenefits with your Secure Token:</p><a href="https://nb.fidelity.com/public/nb/default/home">Login with Secure Token</a>
-    <div class="col-sm-4">
-        <form:form action="/fidelity-spring-demo/attach" method="post" modelAttribute="dashboardForm" id="loginForm" cssClass="form-horizontal">
-
-            <form:errors path="*" element="div" cssClass="alert alert-danger"/>
-
-            <c:if test="${param.nosoftware != null}">
-                <div class="alert alert-danger">No WWPass software found!</div>
-            </c:if>
-
-            
-
-						
-            <form:hidden path="ticket" id="ticket" />
-            <input type="hidden" name="userid" id="userid" value="principal.username">gfdgfdgf</input>
-            
-
-        </form:form>
-
-        <div class="form-group">
-            <div class="col-sm-10">
-                <button type="submit" class="btn btn-primary" onClick="javascript:OnAuth();">Attach</button>
-            </div>
-        </div>
-    </div>
-    
-    <br/><br/>
-    <p>Login to Fidelity NetBenefits (manual password entry):</p> <a href="https://nb.fidelity.com/public/nb/default/home">Conventional Login</a>
-    
-    
-    
-    
-    
-    
-    <br/><br/><br/><br/><br/>
-    <p>Attach your PassKey to your Fidelity NetBenefits profile:</p>
+    <h2>Attach your PassKey to your profile:</h2>
     <c:if test="${param.error != null}">
         <div class="alert alert-danger">
             Failed to login.
